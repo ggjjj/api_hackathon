@@ -1,14 +1,19 @@
 # api_hackathon
 
 # home-grocery-management
+```
 sudo apt update  # Make sure your package list is up to date
+
 sudo apt install python3-venv  # Install venv if not already installed
+
 python3 -m venv venv
+
 source venv/bin/activate  # Activate the virtual environment
+
 pip install fastapi uvicorn
 
 uvicorn main:app --reload # run the main app
-
+```
 # home-grocery-management API commands
 ## Get all items
 curl http://127.0.0.1:8000/items 
