@@ -39,3 +39,14 @@ class ShoppingList(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
+
+class GroceryItemCreate(BaseModel):
+    name: str
+    category: str
+    quantity: str
+    expirationDate: date
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
