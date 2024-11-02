@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: Home Grocery Management API
+  description: An API to manage grocery items in a household fridge.
+  version: 1.0.0
+servers:
+  - url: /api/v1/fridge
+paths:
+  /items:
+    get:
+      summary: Get all items in the fridge
+      description: Retrieves all items currently stored in the fridge.
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by item category.
+        - name: expiringSoon
+          in: query
+          schema:
+            type: boolean
+          description: Return items expiring soon.
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, expirationDate, category]
+          description: Sort the items.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        quantity:
+                          type: string
+                        expirationDate:
+                          type: string
+                          format: date
+    post:
+      summary: Add a new item
+      description: Adds a new grocery item to the fridge.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                category:
+                  type: string
+                quantity:
+                  type: string
+                purchaseDate:
+                  type: string
+                  format: date
+                expirationDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Item added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      category:
+                        type: string
+                      quantity:
+                        type: string
+                      expirationDate:
+                        type: string
+                        format: date
+  /items/{id}:
+    put:
+      summary: Update an item
+      description: Updates details of a specific item.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                quantity:
+                  type: string
+                expirationDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      quantity:
+                        type: string
+                      expirationDate:
+                          type: string
+                          format: date
+    delete:
+      summary: Delete an item
+      description: Deletes a specific item from the fridge.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Item deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+  /alerts:
+    get:
+      summary: Get expiration alerts
+      description: Retrieves a list of items expiring soon.
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+          description: Number of days to check for expiring items (default: 3 days).
+      responses:
+        '200':
+          description: Expiring items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  alerts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        expirationDate:
+                          type: string
+                          format: date
+                        daysLeft:
+                          type: integer
+  /items/search:
+    get:
+      summary: Search for items
+      description: Search for items in the fridge by name or keyword.
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+          required: true
+          description: Search keyword.
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        quantity:
+                          type: string
+                        expirationDate:
+                          type: string
+                          format: date
+  /items/batch:
+    post:
+      summary: Batch add or update items
+      description: Add or update multiple items in one request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      category:
+                        type: string
+                      quantity:
+                        type: string
+                      purchaseDate:
+                        type: string
+                        format: date
+                      expirationDate:
+                        type: string
+                        format: date
+      responses:
+        '200':
+          description: Items added/updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        quantity:
+                          type: string
+                        expirationDate:
+                          type: string
+                          format: date
+  /shopping-list:
+    get:
+      summary: Generate shopping list
+      description: Generates a shopping list of items needing restocking.
+      parameters:
+        - name: minQuantity
+          in: query
+          schema:
+            type: integer
+          description: Minimum quantity threshold.
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category.
+      responses:
+        '200':
+          description: Shopping list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  shoppingList:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        neededQuantity:
+                          type: string
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - BearerAuth: []

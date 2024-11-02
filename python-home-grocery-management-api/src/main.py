@@ -2,9 +2,9 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, relationship
-from models import Base, GroceryItemDB, ShoppingListDB
-from schemas import GroceryItem, BatchItems, Alert, ShoppingList, GroceryItemCreate
-from config import DATABASE_URL
+from src.models import Base, GroceryItemDB, ShoppingListDB
+from src.schemas import GroceryItem, BatchItems, Alert, ShoppingList, GroceryItemCreate
+from src.config import DATABASE_URL
 from typing import Optional, List
 from datetime import date, timedelta
 

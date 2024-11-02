@@ -11,9 +11,21 @@ python3 -m venv venv
 source venv/bin/activate  # Activate the virtual environment
 
 pip install fastapi uvicorn
+# DB dependencies
+pip install SQLAlchemy
+pip install python-decouple
+pip install psycopg2
+pip install python-dotenv
+
+export DATABASE_URL=XXXX
 
 uvicorn main:app --reload # run the main app
+pip install faker
+
+pip install pytest httpx pytest-asyncio # test dependencies
+
 ```
+
 # home-grocery-management API commands
 ## Get all items
 curl http://127.0.0.1:8000/items 
