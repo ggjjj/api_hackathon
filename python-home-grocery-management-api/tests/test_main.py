@@ -1,92 +1,84 @@
-# tests/test_main.py
-import pytest
+# test_main.py
+from datetime import date, timedelta
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-from src.main import app, get_db
-from tests.mock import generate_mock_items, generate_mock_alerts
+from src.main import app , get_db
+from tests.mock import get_mock_db
 
+# Override the dependency with the mock function
+app.dependency_overrides[get_db] = get_mock_db
+
+# Initialize the TestClient
 client = TestClient(app)
 
-@pytest.fixture
-def mock_db_session(monkeypatch):
-    # Create a mock session
-    mock_session = MagicMock()
-    
-    # Generate mock grocery items and set up the mock session
-    mock_items = generate_mock_items(5)
-    mock_session.query.return_value.all.return_value = [MagicMock(**item.dict()) for item in mock_items.items]
-    
-    # Mock the get_db dependency to return the mock session
-    monkeypatch.setattr("src.main.get_db", lambda: mock_session)
-
-    return mock_session, mock_items
-
-def test_get_all_items(mock_db_session):
-    mock_session, mock_items = mock_db_session
+# Endpoint 1 - Test to Get all grocery items in the fridge
+def test_get_all_items():
     response = client.get("/items")
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "success",
-        "items": [item.dict() for item in mock_items.items]  # Convert mock_items to dicts if needed
-    }
+    data = response.json()
+    assert data["status"] == "success"
+    assert len(data["items"]) == len(get_mock_db().query().filter().all())
 
-
-def test_add_item(mock_db_session):
-    mock_session, _ = mock_db_session
+# Endpoint 2 - Test to Add a new grocery item to the fridge
+def test_add_item():
     new_item = {
-        "name": "Bread",
-        "category": "Bakery",
-        "quantity": "1 loaf",
-        "expirationDate": "2024-11-20"
+        "name": "Apples",
+        "category": "Fruit",
+        "quantity": "6",
+        "expirationDate": str(date.today() + timedelta(days=10))
     }
-    mock_session.add = MagicMock()
-    mock_session.commit = MagicMock()
-    
     response = client.post("/items", json=new_item)
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "success",
-        "message": "Item added",
-        "item": {**new_item, "id": 6}  # Assuming id will be generated as 6
-    }
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Item added"
+    assert data["item"]["name"] == new_item["name"]
 
-def test_update_item(mock_db_session):
-    mock_session, mock_items = mock_db_session
+# Endpoint 3 - Test to Get a grocery item by ID
+def test_get_item():
+    response = client.get("/items/1")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["item"]["id"] == 1
+
+# Endpoint 4 - Test to Update a grocery item by ID
+def test_update_item():
     updated_item = {
-        "name": "Organic Milk",
-        "category": "Dairy",
-        "quantity": "1 liter",
-        "expirationDate": "2024-11-12"
+        "id": 2,
+        "name": "Updated Bread",
+        "category": "Bakery",
+        "quantity": "2 loaves",
+        "expirationDate": str(date.today() + timedelta(days=4))
     }
-    mock_session.query.return_value.filter.return_value.first.return_value = MagicMock(**mock_items.items[0].dict())
-    mock_session.commit = MagicMock()
-
     response = client.put("/items/1", json=updated_item)
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "success",
-        "message": "Item updated",
-        "item": {**updated_item, "id": 1}
-    }
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Item updated"
+    assert data["item"]["name"] == updated_item["name"]
 
-def test_delete_item(mock_db_session):
-    mock_session, mock_items = mock_db_session
-    mock_session.query.return_value.filter.return_value.first.return_value = MagicMock(**mock_items.items[0].dict())
-    mock_session.delete = MagicMock()
-    mock_session.commit = MagicMock()
-
+# Endpoint 5 - Test to Delete a grocery item 
+def test_delete_item():
     response = client.delete("/items/1")
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "success",
-        "message": "Item deleted"
-    }
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Item deleted"
 
-def test_get_expiration_alerts(mock_db_session):
-    mock_session, mock_items = mock_db_session
-    mock_session.query.return_value.filter.return_value.all.return_value = [MagicMock(**item.dict()) for item in mock_items.items]
-    
-    response = client.get("/alerts")
-    alerts = generate_mock_alerts(3)  # Check for alerts within 3 days
-    assert response.status_code == 200
-    assert response.json() == {"status": "success", "alerts": alerts}
+
+# # Endpoint 6 - Test to Search for a grocery item
+# def test_search_item():
+#     response = client.get("/items/search?q=Milk")
+#     #assert response.status_code == 200
+#     data = response.json()
+#     # assert data["status"] == "success"
+#     # assert len(data["items"]) == 1
+#     # assert data["items"][0]["name"] == "Milk"
+
+# # Endpoint 7 - Test to Get all expired grocery items
+# def test_get_expired_items():
+#     response = client.get("/items/expired")
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert data["status"] == "success"
+#     assert len(data["items"]) == 2

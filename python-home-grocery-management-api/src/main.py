@@ -2,11 +2,11 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, relationship
-from src.models import Base, GroceryItemDB, ShoppingListDB
-from src.schemas import GroceryItem, BatchItems, Alert, ShoppingList, GroceryItemCreate
+from src.models import Base, GroceryItemDB
+from src.schemas import GroceryItem, GroceryItemCreate
 from src.config import DATABASE_URL
-from typing import Optional, List
-from datetime import date, timedelta
+from typing import Optional
+from datetime import date
 
 # Set up Database connection
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
@@ -24,6 +24,7 @@ def get_db():
     finally:
         db.close()
 
+# Endpoint 1 - Get all grocery items in the fridge
 @app.get("/items", response_model=dict)
 def get_all_items(db: Session = Depends(get_db), category: Optional[str] = None, expiringSoon: Optional[bool] = None, sortBy: Optional[str] = None):
     query = db.query(GroceryItemDB)
@@ -33,7 +34,7 @@ def get_all_items(db: Session = Depends(get_db), category: Optional[str] = None,
     
     if expiringSoon:
         today = date.today()
-        query = query.filter(GroceryItemDB.expiration_date <= today)
+        query = query.filter(GroceryItemDB.expirationDate <= today)
     
     db_items = query.all()
     
@@ -41,13 +42,14 @@ def get_all_items(db: Session = Depends(get_db), category: Optional[str] = None,
     
     return {"status": "success", "items": items}
 
+# Endpoint 2 - Add a new grocery item to the fridge
 @app.post("/items", response_model=dict)
 def add_item(item: GroceryItemCreate, db: Session = Depends(get_db)):
     db_item = GroceryItemDB(
         name=item.name,
         category=item.category,
         quantity=item.quantity,
-        expiration_date=item.expirationDate
+        expirationDate=item.expirationDate
     )
     db.add(db_item)
     db.commit()
@@ -58,8 +60,18 @@ def add_item(item: GroceryItemCreate, db: Session = Depends(get_db)):
     
     return {"status": "success", "message": "Item added", "item": response_item}
 
+# Endpoint 3 - Get a grocery item by ID
+@app.get("/items/{id}", response_model=dict)
+def get_item(id: int, db: Session = Depends(get_db)):
+    db_item = db.query(GroceryItemDB).filter(GroceryItemDB.id == id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    response_item = GroceryItem.from_orm(db_item)
+    
+    return {"status": "success", "item": response_item}
 
-
+# Endpoint 4 - Update a grocery item by ID
 @app.put("/items/{id}", response_model=dict)
 def update_item(id: int, item: GroceryItem, db: Session = Depends(get_db)):
     db_item = db.query(GroceryItemDB).filter(GroceryItemDB.id == id).first()
@@ -77,7 +89,7 @@ def update_item(id: int, item: GroceryItem, db: Session = Depends(get_db)):
     
     return {"status": "success", "message": "Item updated", "item": response_item}
 
-
+# Endpoint 5 - Delete a grocery item 
 @app.delete("/items/{id}", response_model=dict)
 def delete_item(id: int, db: Session = Depends(get_db)):
     db_item = db.query(GroceryItemDB).filter(GroceryItemDB.id == id).first()
@@ -88,66 +100,16 @@ def delete_item(id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "message": "Item deleted"}
 
-@app.get("/alerts", response_model=dict)
-def get_expiration_alerts(days: Optional[int] = 3, db: Session = Depends(get_db)):
-    today = date.today()
-    alerts = db.query(GroceryItemDB).filter(GroceryItemDB.expiration_date <= today + timedelta(days=days)).all()
-    alert_list = [
-        Alert(
-            id=item.id,
-            name=item.name,
-            category=item.category,
-            expirationDate=item.expiration_date,
-            daysLeft=(item.expiration_date - today).days,
-        )
-        for item in alerts
-    ]
-    return {"status": "success", "alerts": alert_list}
-
+# Endpoint 6 - Search for a grocery item
 @app.get("/items/search", response_model=dict)
 def search_items(query: str, db: Session = Depends(get_db)):
     results = db.query(GroceryItemDB).filter(GroceryItemDB.name.ilike(f"%{query}%")).all()
     return {"status": "success", "results": [GroceryItem.from_orm(result) for result in results]}
 
-@app.post("/items/batch", response_model=dict)
-def add_items(items: List[GroceryItemCreate], db: Session = Depends(get_db)):
-    # Prepare a list of GroceryItemDB objects without specifying the ID
-    db_items = [
-        GroceryItemDB(
-            name=item.name,
-            category=item.category,
-            quantity=item.quantity,
-            expiration_date=item.expirationDate
-        ) for item in items
-    ]
-
-    # Add all items to the session and commit
-    db.add_all(db_items)
-    db.commit()
-
-    # Refresh each item to get their IDs and other details from the DB
-    for item in db_items:
-        db.refresh(item)
-    
-    # Convert to Pydantic models before returning
-    response_items = [GroceryItem.from_orm(item) for item in db_items]
-
-    return {"status": "success", "message": "Items added", "items": response_items}
-
-
-@app.get("/shopping-list", response_model=dict)
-def generate_shopping_list(minQuantity: Optional[int] = 1, category: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(GroceryItemDB)
-    if category:
-        query = query.filter(GroceryItemDB.category == category)
-    
-    items = query.all()
-    shopping_list = [
-        ShoppingList(
-            name=item.name,
-            category=item.category,
-            neededQuantity=item.quantity,
-        )
-        for item in items if float(item.quantity.split()[0]) < minQuantity
-    ]
-    return {"status": "success", "shoppingList": shopping_list}
+# Endpoint 7 - Get all expired grocery items
+@app.get("/items/expired", response_model=dict)
+def get_expired_items(db: Session = Depends(get_db)):
+    today = date.today()
+    expired_items = db.query(GroceryItemDB).filter(GroceryItemDB.expirationDate < today).all()
+    results = [GroceryItem.from_orm(item) for item in expired_items]
+    return {"status": "success", "results": results}

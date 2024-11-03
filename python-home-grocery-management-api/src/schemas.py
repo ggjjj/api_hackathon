@@ -10,7 +10,7 @@ class GroceryItem(BaseModel):
     name: str
     category: str
     quantity: str
-    expirationDate: date = Field(..., alias="expiration_date")
+    expirationDate: date
 
     class Config:
         orm_mode = True
@@ -49,4 +49,3 @@ class GroceryItemCreate(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
-

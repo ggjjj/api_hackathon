@@ -1,42 +1,25 @@
-# tests/mock.py
-from datetime import date
-from src.main import GroceryItem, Alert, BatchItems, ShoppingList
+# mock.py
+from datetime import date, timedelta
+from unittest.mock import MagicMock
+from src.schemas import GroceryItem, Alert, ShoppingList
 
-def create_mock_grocery_item(item_id: int) -> GroceryItem:
-    """Create a mock grocery item with a given ID."""
-    return GroceryItem(
-        id=item_id,
-        name="Sample Item",
-        category="Dairy",
-        quantity="1 liter",
-        expirationDate=date(2024, 11, 20)
-    )
+# Mock data for testing purposes
+mock_items = [
+    GroceryItem(id=1, name="Milk", category="Dairy", quantity="1 liter", expirationDate=date.today() + timedelta(days=2)),
+    GroceryItem(id=2, name="Bread", category="Bakery", quantity="2 loaves", expirationDate=date.today() + timedelta(days=1)),
+    GroceryItem(id=3, name="Eggs", category="Dairy", quantity="12", expirationDate=date.today() + timedelta(days=5)),
+]
 
-def generate_mock_items(count: int) -> BatchItems:
-    """Generate a batch of mock grocery items."""
-    items = [create_mock_grocery_item(i) for i in range(1, count + 1)]
-    return BatchItems(items=items)
+mock_items_expired = [
+    GroceryItem(id=4, name="Old Milk", category="Dairy", quantity="1 liter", expirationDate=date.today() - timedelta(days=1)),
+]
 
-def generate_mock_alerts(days: int = 3) -> list:
-    """Generate mock alerts for items that expire within a certain number of days."""
-    today = date.today()
-    alerts = [
-        Alert(
-            id=i,
-            name="Sample Item",
-            category="Dairy",
-            expirationDate=date(2024, 11, 20),
-            daysLeft=(date(2024, 11, 20) - today).days,
-        )
-        for i in range(1, 6)  # Example of 5 alerts
-        if (date(2024, 11, 20) - today).days <= days
-    ]
-    return alerts
-
-def create_mock_shopping_list() -> ShoppingList:
-    """Create a mock shopping list."""
-    return ShoppingList(
-        name="Sample Shopping List",
-        category="Dairy",
-        neededQuantity="2 liters"
-    )
+# Override the database dependency to use mock data
+def get_mock_db():
+    db = MagicMock()
+    
+    # Mock the query results for different endpoints
+    db.query.return_value.filter.return_value.all.side_effect = lambda: mock_items
+    db.query.return_value.filter.return_value.first.side_effect = lambda: mock_items[0] if mock_items else None
+    db.query.return_value.all.side_effect = lambda: mock_items
+    return db
