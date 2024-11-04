@@ -5,13 +5,13 @@ from src.schemas import GroceryItem, Alert, ShoppingList
 
 # Mock data for testing purposes
 mock_items = [
-    GroceryItem(id=1, name="Milk", category="Dairy", quantity="1 liter", expirationDate=date.today() + timedelta(days=2)),
-    GroceryItem(id=2, name="Bread", category="Bakery", quantity="2 loaves", expirationDate=date.today() + timedelta(days=1)),
-    GroceryItem(id=3, name="Eggs", category="Dairy", quantity="12", expirationDate=date.today() + timedelta(days=5)),
+    GroceryItem(id=1, name="Milk", category="Dairy", quantity="1 liter", expiration_date=date.today() + timedelta(days=2)),
+    GroceryItem(id=2, name="Bread", category="Bakery", quantity="2 loaves", expiration_date=date.today() + timedelta(days=1)),
+    GroceryItem(id=3, name="Eggs", category="Dairy", quantity="12", expiration_date=date.today() + timedelta(days=5)),
 ]
 
 mock_items_expired = [
-    GroceryItem(id=4, name="Old Milk", category="Dairy", quantity="1 liter", expirationDate=date.today() - timedelta(days=1)),
+    GroceryItem(id=4, name="Old Milk", category="Dairy", quantity="1 liter", expiration_date=date.today() - timedelta(days=1)),
 ]
 
 # Override the database dependency to use mock data

@@ -24,7 +24,7 @@ def test_add_item():
         "name": "Apples",
         "category": "Fruit",
         "quantity": "6",
-        "expirationDate": str(date.today() + timedelta(days=10))
+        "expiration_date": str(date.today() + timedelta(days=10))
     }
     response = client.post("/items", json=new_item)
     assert response.status_code == 200
@@ -48,9 +48,9 @@ def test_update_item():
         "name": "Updated Bread",
         "category": "Bakery",
         "quantity": "2 loaves",
-        "expirationDate": str(date.today() + timedelta(days=4))
+        "expiration_date": str(date.today() + timedelta(days=4))
     }
-    response = client.put("/items/1", json=updated_item)
+    response = client.put("/updateItem/1", json=updated_item)
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
@@ -59,26 +59,26 @@ def test_update_item():
 
 # Endpoint 5 - Test to Delete a grocery item 
 def test_delete_item():
-    response = client.delete("/items/1")
+    response = client.delete("/deleteItem/1")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
     assert data["message"] == "Item deleted"
 
 
-# # Endpoint 6 - Test to Search for a grocery item
-# def test_search_item():
-#     response = client.get("/items/search?q=Milk")
-#     #assert response.status_code == 200
-#     data = response.json()
-#     # assert data["status"] == "success"
-#     # assert len(data["items"]) == 1
-#     # assert data["items"][0]["name"] == "Milk"
+# Endpoint 6 - Test to Search for a grocery item
+def test_search_item():
+    response = client.get("/items/searchItem?query=Paneer")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["name"] == "Paneer"
 
-# # Endpoint 7 - Test to Get all expired grocery items
-# def test_get_expired_items():
-#     response = client.get("/items/expired")
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["status"] == "success"
-#     assert len(data["items"]) == 2
+# Endpoint 7 - Test to Get all expired grocery items
+def test_get_expired_items():
+    response = client.get("/expiredItems/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert len(data["items"]) == 2
