@@ -72,7 +72,7 @@ def get_item(id: int, db: Session = Depends(get_db)):
     return {"status": "success", "item": response_item}
 
 # Endpoint 4 - Update a grocery item by ID
-@app.put("/items/{id}", response_model=dict)
+@app.put("/updateItem/{id}", response_model=dict)
 def update_item(id: int, item: GroceryItem, db: Session = Depends(get_db)):
     db_item = db.query(GroceryItemDB).filter(GroceryItemDB.id == id).first()
     if db_item is None:
@@ -90,7 +90,7 @@ def update_item(id: int, item: GroceryItem, db: Session = Depends(get_db)):
     return {"status": "success", "message": "Item updated", "item": response_item}
 
 # Endpoint 5 - Delete a grocery item 
-@app.delete("/items/{id}", response_model=dict)
+@app.delete("/deleteItem/{id}", response_model=dict)
 def delete_item(id: int, db: Session = Depends(get_db)):
     db_item = db.query(GroceryItemDB).filter(GroceryItemDB.id == id).first()
     if db_item is None:
@@ -101,13 +101,13 @@ def delete_item(id: int, db: Session = Depends(get_db)):
     return {"status": "success", "message": "Item deleted"}
 
 # Endpoint 6 - Search for a grocery item
-@app.get("/items/search", response_model=dict)
+@app.get("/searchItem", response_model=dict)
 def search_items(query: str, db: Session = Depends(get_db)):
     results = db.query(GroceryItemDB).filter(GroceryItemDB.name.ilike(f"%{query}%")).all()
     return {"status": "success", "results": [GroceryItem.from_orm(result) for result in results]}
 
 # Endpoint 7 - Get all expired grocery items
-@app.get("/items/expired", response_model=dict)
+@app.get("/expiredItems/", response_model=dict)
 def get_expired_items(db: Session = Depends(get_db)):
     today = date.today()
     expired_items = db.query(GroceryItemDB).filter(GroceryItemDB.expiration_date < today).all()
