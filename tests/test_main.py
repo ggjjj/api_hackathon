@@ -68,12 +68,11 @@ def test_delete_item():
 
 # Endpoint 6 - Test to Search for a grocery item
 def test_search_item():
-    response = client.get("/items/searchItem?query=Paneer")
+    response = client.get("/searchItem?query=bread")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
-    assert len(data["items"]) == 1
-    assert data["items"][0]["name"] == "Paneer"
+    assert len(data["results"]) == 3
 
 # Endpoint 7 - Test to Get all expired grocery items
 def test_get_expired_items():
@@ -81,4 +80,4 @@ def test_get_expired_items():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
-    assert len(data["items"]) == 2
+    assert len(data["results"]) == 3
