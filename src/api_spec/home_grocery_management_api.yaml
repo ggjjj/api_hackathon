@@ -53,7 +53,7 @@ paths:
                           type: string
                         expirationDate:
                           type: string
-                          format: date
+                          format: date  
     post:
       summary: Add a new item
       description: Adds a new grocery item to the fridge.
@@ -151,6 +151,7 @@ paths:
                   message:
                     type: string
                     example: Item not found
+  /updateItem/{id}:  
     put:
       summary: Update an item
       description: Updates details of a specific item.
@@ -212,6 +213,7 @@ paths:
                   message:
                     type: string
                     example: Item not found
+  /deleteItem/{id}:  
     delete:
       summary: Delete an item
       description: Deletes a specific item from the fridge.
@@ -247,7 +249,7 @@ paths:
                   message:
                     type: string
                     example: Item not found
-  /items/search:
+  /searchItem:
     get:
       summary: Search for items
       description: Search for items in the fridge by name or keyword.
@@ -285,7 +287,7 @@ paths:
                         expirationDate:
                           type: string
                           format: date
-  /items/expired:
+  /expiredItems/:
       get:
         summary: Get expired items
         description: Get all expired grocery items in the fridge.
