@@ -57,9 +57,10 @@ curl -X POST “[http://127.0.0.1:8000/items](http://127.0.0.1:8000/items)” -H
 ```
 #### Endpoint 3 - Get a grocery item by ID
 ```
-curl --request GET \
---url https://default-blackbird-viveks-organization-865b3-0.blackbird-relay.a8r.io/grocery-management/items/3 \
---header 'Accept: application/json'
+curl -X 'GET' \
+  'https://api-hackathon-pcwp.onrender.com/items/17' \
+  -H 'accept: application/json'
+
 ```
 #### Endpoint 4 - Update a grocery item by ID
 ```
