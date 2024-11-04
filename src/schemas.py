@@ -10,7 +10,7 @@ class GroceryItem(BaseModel):
     name: str
     category: str
     quantity: str
-    expirationDate: date
+    expiration_Date: date
 
     class Config:
         orm_mode = True
@@ -21,7 +21,7 @@ class Alert(BaseModel):
     id: int
     name: str
     category: str
-    expirationDate: date
+    expiration_Date: date
     daysLeft: int
 
     class Config:
@@ -44,7 +44,7 @@ class GroceryItemCreate(BaseModel):
     name: str
     category: str
     quantity: str
-    expirationDate: date
+    expiration_Date: date
 
     class Config:
         orm_mode = True
