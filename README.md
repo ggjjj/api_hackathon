@@ -23,10 +23,28 @@ uvicorn main:app --reload # run the main app
 
 ## Endpoint definitions and commands
 
-#### Endpoint 1 - Get all grocery items in the fridge
+#### Endpoint 1 A - Get all grocery items in the fridge
 ```
 curl http://127.0.0.1:8000/items
 ```
+
+#### Endpoint 1 B - Get all items filtered by category
+```
+curl -X 'GET' \
+  'https://api-hackathon-pcwp.onrender.com/items?category=Dairy' \
+  -H 'accept: application/json'
+
+```
+
+
+#### Endpoint 1 C - Get all items filtered by category which are expiring
+```
+curl -X 'GET' \
+  'https://api-hackathon-pcwp.onrender.com/items?category=Fruits&expiringSoon=true' \
+  -H 'accept: application/json'
+
+```
+
 
 #### Endpoint 2 - Add a new grocery item to the fridge
 ```
@@ -74,5 +92,8 @@ curl -X 'GET' \
 ```
 #### Endpoint 7 - Get all expired grocery items
 ```
-curl "http://127.0.0.1:8000/items?category=Dairy"
+curl -X 'GET' \
+  'https://api-hackathon-pcwp.onrender.com/expiredItems/' \
+  -H 'accept: application/json'
+
 ```
