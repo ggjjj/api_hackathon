@@ -12,4 +12,4 @@ class GroceryItemDB(Base):
     name = Column(String, index=True)
     category = Column(String)
     quantity = Column(String)
-    expiration_Date = Column(Date)
+    expiration_date = Column(Date)

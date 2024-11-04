@@ -34,7 +34,7 @@ def get_all_items(db: Session = Depends(get_db), category: Optional[str] = None,
     
     if expiringSoon:
         today = date.today()
-        query = query.filter(GroceryItemDB.expiration_Date <= today)
+        query = query.filter(GroceryItemDB.expiration_date <= today)
     
     db_items = query.all()
     
@@ -49,7 +49,7 @@ def add_item(item: GroceryItemCreate, db: Session = Depends(get_db)):
         name=item.name,
         category=item.category,
         quantity=item.quantity,
-        expiration_Date=item.expiration_Date
+        expiration_date=item.expiration_date
     )
     db.add(db_item)
     db.commit()
@@ -110,6 +110,6 @@ def search_items(query: str, db: Session = Depends(get_db)):
 @app.get("/items/expired", response_model=dict)
 def get_expired_items(db: Session = Depends(get_db)):
     today = date.today()
-    expired_items = db.query(GroceryItemDB).filter(GroceryItemDB.expiration_Date < today).all()
+    expired_items = db.query(GroceryItemDB).filter(GroceryItemDB.expiration_date < today).all()
     results = [GroceryItem.from_orm(item) for item in expired_items]
     return {"status": "success", "results": results}
